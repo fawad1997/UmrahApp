@@ -98,7 +98,7 @@ export default function JoinGroupPage() {
         </form>
 
         <p className="text-center text-xs text-slate-500">
-          Contact your guide if you don't have a group code
+          Contact your guide if you don&apos;t have a group code
         </p>
       </div>
     </div>

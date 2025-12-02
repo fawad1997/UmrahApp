@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import { formatMessageTime } from "@/lib/utils";
 import { Role } from "@prisma/client";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -237,11 +238,14 @@ export default function ChatPage() {
                 )}
                 {message.type === "IMAGE" && message.imageUrl ? (
                   <div className="mb-2">
-                    <img
+                    <Image
                       src={message.imageUrl}
                       alt="Shared image"
-                      className="max-w-full h-auto rounded"
+                      width={500}
+                      height={500}
+                      className="max-w-full h-auto rounded cursor-pointer"
                       onClick={() => window.open(message.imageUrl!, "_blank")}
+                      unoptimized
                     />
                   </div>
                 ) : null}
