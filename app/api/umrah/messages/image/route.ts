@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { put } from "@vercel/blob";
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,25 +54,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create uploads directory structure
-    const uploadsDir = join(process.cwd(), "public", "uploads", user.currentGroupId);
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-
     // Generate unique filename
     const timestamp = Date.now();
     const fileExtension = file.name.split(".").pop();
-    const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
-    const filePath = join(uploadsDir, filename);
+    const filename = `${user.currentGroupId}/${timestamp}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
 
-    // Save file
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    // Upload to Vercel Blob Storage
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
-    // Generate URL
-    const imageUrl = `/uploads/${user.currentGroupId}/${filename}`;
+    // Use the blob URL
+    const imageUrl = blob.url;
 
     // Create message
     const message = await prisma.message.create({
