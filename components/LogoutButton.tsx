@@ -3,12 +3,13 @@
 import { signOut } from "next-auth/react";
 
 export function LogoutButton() {
-  const handleLogout = () => {
-    // Use the current origin to ensure we redirect to the correct domain
-    const callbackUrl = typeof window !== "undefined" 
-      ? `${window.location.origin}/login`
-      : "/login";
-    signOut({ callbackUrl });
+  const handleLogout = async () => {
+    // Sign out without redirect
+    await signOut({ redirect: false });
+    // Manually redirect to ensure we use the correct domain
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
   };
 
   return (
