@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  name            String
+  role            Role      @default(PILGRIM)
+  phone           String?
+  currentGroupId  String?
+  currentGroup    Group?    @relation("CurrentGroup", fields: [currentGroupId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  groupsCreated   Group[]   @relation("GroupGuide")
+  messages        Message[]
+  
+  @@index([email])
+  @@map("users")
+}
+
+model Group {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique
+  guideId     String
+  guide       User      @relation("GroupGuide", fields: [guideId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  messages    Message[]
+  members     User[]    @relation("CurrentGroup")
+  
+  @@index([code])
+  @@index([guideId])
+  @@map("groups")
+}
+
+model Message {
+  id          String      @id @default(uuid())
+  groupId     String
+  group       Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  type        MessageType @default(TEXT)
+  text        String?
+  imageUrl    String?
+  createdAt   DateTime    @default(now())
+  
+  @@index([groupId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+enum Role {
+  GUIDE
+  PILGRIM
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  ANNOUNCEMENT
+}
+
